@@ -1571,7 +1571,7 @@ class Compiler:
         platform: Optional[CompilerPlatform] = None,
         externals: Optional[Sequence[str]] = None,
     ) -> None:
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "project_root": project_root,
             "output_format": output_format,
             "bundle_format": bundle_format,
