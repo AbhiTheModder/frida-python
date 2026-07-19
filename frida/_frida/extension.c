@@ -2782,10 +2782,16 @@ static PyObject *
 PyDevice_enable_spawn_gating (PyDevice * self)
 {
   GError * error = NULL;
+  FridaSpawnGatingOptions * options;
+
+  options = frida_spawn_gating_options_new ();
 
   Py_BEGIN_ALLOW_THREADS
-  frida_device_enable_spawn_gating_sync (PY_GOBJECT_HANDLE (self), g_cancellable_get_current (), &error);
+  frida_device_enable_spawn_gating_sync (PY_GOBJECT_HANDLE (self), options, g_cancellable_get_current (), &error);
   Py_END_ALLOW_THREADS
+
+  g_object_unref (options);
+
   if (error != NULL)
     return PyFrida_raise (error);
 
