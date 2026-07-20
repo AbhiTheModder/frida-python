@@ -1,5 +1,7 @@
 *.pyc
 *.user
+*.abi3.so
 /*.egg-info/
+/.cache/
 /build/
 /dist/
