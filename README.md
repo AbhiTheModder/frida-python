@@ -1,6 +1,8 @@
 # frida-python
 
-Python [bindings](https://github.com/frida/frida-python) for [Frida](https://frida.re) but with devkit.
+Python [bindings](https://github.com/frida/frida-python) for [Frida](https://frida.re), built against a Frida devkit.
+
+The extension and its Python facade are generated at install time from the devkit's `frida-core.gir`, then linked against its `libfrida-core` library. No Frida source checkout or Frida source build is needed.
 
 # Some tips during development
 
@@ -12,7 +14,7 @@ pip install --force-reinstall frida-<FRIDA_VERSION>-cp37-abi3-linux_aarch64.whl
 ```
 
 > [!NOTE]
-> Note that you use devkit of same version which you're installing for.
+> Use the devkit for the same version that you are installing. The generator also needs the system `GLib-2.0.gir`, `GObject-2.0.gir`, and `Gio-2.0.gir` files. On Termux these are normally in `$PREFIX/share/gir-1.0`. Set `FRIDA_GIR_DIR` if they are elsewhere.
 
 ## Example:
 

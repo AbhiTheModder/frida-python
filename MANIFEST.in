@@ -1,0 +1,4 @@
+include frida/extension.version
+include frida/py.typed
+recursive-include frida/frida_bindgen *.py *.c *.h
+recursive-include frida/frida_bindgen_core *.py
