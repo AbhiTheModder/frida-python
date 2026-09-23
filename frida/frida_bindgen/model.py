@@ -18,6 +18,10 @@ class Model(core.Model):
 
 class ObjectType(core.ObjectType):
     @cached_property
+    def methods(self) -> List["Method"]:
+        return [m for m in super().methods if not m.out_parameters or m.optional_out_parameter is not None]
+
+    @cached_property
     def py_name(self) -> str:
         custom = self.customizations
         if custom is not None and custom.py_name is not None:
@@ -276,6 +280,7 @@ def _make_class(
     type_struct,
     parent,
     constructors,
+    functions,
     methods,
     properties,
     signals,
@@ -290,6 +295,7 @@ def _make_class(
         type_struct,
         parent,
         constructors,
+        functions,
         methods,
         properties,
         signals,
@@ -306,6 +312,7 @@ def _make_interface(
     type_struct,
     parent,
     constructors,
+    functions,
     methods,
     properties,
     signals,
@@ -319,6 +326,7 @@ def _make_interface(
         type_struct,
         parent,
         constructors,
+        functions,
         methods,
         properties,
         signals,
