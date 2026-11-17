@@ -398,6 +398,7 @@ def generate_aio_class(otype: ObjectType, model: Model) -> str:
         return generate_aio_interface_facade(otype)
 
     members = [generate_facade_init(otype)]
+    members += generate_facade_factories(otype, model)
     if otype.signals and not otype.provides_signals:
         members.append(generate_facade_signals())
     for method in otype.methods:
@@ -510,6 +511,7 @@ def generate_py_class(otype: ObjectType, model: Model) -> str:
         return generate_interface_facade(otype)
 
     members = [generate_facade_init(otype)]
+    members += generate_facade_factories(otype, model)
     if otype.signals and not otype.provides_signals:
         members.append(generate_facade_signals())
     for method in otype.methods:
@@ -559,6 +561,17 @@ def generate_facade_init(otype: ObjectType) -> str:
         setup = getattr(self, "_setup", None)
         if setup is not None:
             setup()"""
+
+
+def generate_facade_factories(otype: ObjectType, model: Model) -> List[str]:
+    members = []
+    for ctor in factory_constructors(otype):
+        params = ", ".join(facade_param(param, model) for param in ctor.input_parameters)
+        names = ", ".join(facade_argument(param, model) for param in ctor.input_parameters)
+        members.append(f"""    @staticmethod
+    def {ctor.name}({params}) -> "{otype.py_name}":
+        return _wrap(_frida.{otype.py_name}.{ctor.name}({names}))""")
+    return members
 
 
 def generate_facade_signals() -> str:
