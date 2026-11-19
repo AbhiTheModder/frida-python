@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from pathlib import Path
-
 from typing import List
 
 from .model import Factory, Model, parse_gir

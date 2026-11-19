@@ -23,9 +23,7 @@ def detect_version():
     pkg_info = SOURCE_ROOT / "PKG-INFO"
     if pkg_info.exists():
         version_line = next(
-            line
-            for line in pkg_info.read_text(encoding="utf-8").splitlines()
-            if line.startswith("Version: ")
+            line for line in pkg_info.read_text(encoding="utf-8").splitlines() if line.startswith("Version: ")
         )
         return version_line[9:]
     return os.environ.get("FRIDA_VERSION", "0.0.0")
@@ -118,9 +116,7 @@ class FridaDevkitExt(build_ext):
 
         env = os.environ.copy()
         source_path = str(SOURCE_ROOT / "frida")
-        env["PYTHONPATH"] = source_path + (
-            os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else ""
-        )
+        env["PYTHONPATH"] = source_path + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
         subprocess.run(
             [
                 sys.executable,

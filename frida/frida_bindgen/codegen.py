@@ -2362,9 +2362,7 @@ PyInit__frida (void)
 
 def generate_exception_registration(model: Model) -> str:
     lines = ["frida_exception_by_error_code = g_hash_table_new_full (NULL, NULL, NULL, PyFrida_object_decref);"]
-    lines += [
-        f'PYFRIDA_DECLARE_EXCEPTION ({c_identifier}, "{name}");' for c_identifier, name in error_members(model)
-    ]
+    lines += [f'PYFRIDA_DECLARE_EXCEPTION ({c_identifier}, "{name}");' for c_identifier, name in error_members(model)]
     lines += [
         'cancelled_exception = PyErr_NewException ("frida.OperationCancelledError", NULL, NULL);',
         "Py_IncRef (cancelled_exception);",

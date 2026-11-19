@@ -5,7 +5,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
-from typing import (Callable, Iterator, List, Optional, Sequence, Tuple)
+from typing import Callable, Iterator, List, Optional, Sequence, Tuple
 
 from .naming import to_snake_case
 
@@ -193,11 +193,7 @@ class ObjectType:
             if has_closure_param or finish_c_identifier is not None:
                 continue
 
-            constructors.append(
-                factory.constructor(
-                    name, c_identifier, finish_c_identifier, param_list, throws, self
-                )
-            )
+            constructors.append(factory.constructor(name, c_identifier, finish_c_identifier, param_list, throws, self))
         return constructors
 
     @cached_property
@@ -225,9 +221,7 @@ class ObjectType:
             finish_func = element.get(f"{{{GLIB_NAMESPACE}}}finish-func")
             if finish_func is None:
                 finish_func = f"{name}_finish"
-            result_element = next(
-                (m for m in self._methods if m.get("name") == finish_func), element
-            )
+            result_element = next((m for m in self._methods if m.get("name") == finish_func), element)
 
             try:
                 (
@@ -237,9 +231,7 @@ class ObjectType:
                     has_closure_param,
                     throws,
                     result_element,
-                ) = extract_callable_details(
-                    element, result_element, self, self.resolve_type
-                )
+                ) = extract_callable_details(element, result_element, self, self.resolve_type)
                 retval_element = result_element.find(".//return-value", GIR_NAMESPACES)
                 rettype = extract_type_from_entity(retval_element, self.resolve_type)
             except AssertionError:
@@ -259,14 +251,10 @@ class ObjectType:
 
                 ownership_val = retval_element.get("transfer-ownership")
                 transfer_ownership = (
-                    TransferOwnership[ownership_val]
-                    if ownership_val is not None
-                    else TransferOwnership.none
+                    TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
                 )
 
-                retval = factory.return_value(
-                    rettype, nullable, transfer_ownership, self
-                )
+                retval = factory.return_value(rettype, nullable, transfer_ownership, self)
             else:
                 retval = None
 
@@ -274,11 +262,7 @@ class ObjectType:
                 is_property_accessor = True
             else:
                 tokens = name.split("_", maxsplit=1)
-                is_property_accessor = (
-                    len(tokens) == 2
-                    and tokens[0] in {"get", "set"}
-                    and tokens[1] in c_prop_names
-                )
+                is_property_accessor = len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names
 
             methods.append(
                 factory.method(
@@ -533,9 +517,7 @@ class Enumeration:
         members = []
         for element in self._members:
             c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
-            members.append(
-                factory.enumeration_member(element.get("name"), c_identifier, self)
-            )
+            members.append(factory.enumeration_member(element.get("name"), c_identifier, self))
         return members
 
     @cached_property
@@ -551,20 +533,14 @@ class EnumerationMember:
     enumeration: Enumeration
 
 
-def parse_gir(
-    file_path: str, dependencies: Sequence[Model], factory: Factory
-) -> Model:
+def parse_gir(file_path: str, dependencies: Sequence[Model], factory: Factory) -> Model:
     tree = ET.parse(file_path)
 
     el = tree.getroot().find("./namespace", GIR_NAMESPACES)
-    namespace = Namespace(
-        el.get("name"), el.get(f"{{{C_NAMESPACE}}}identifier-prefixes"), el
-    )
+    namespace = Namespace(el.get("name"), el.get(f"{{{C_NAMESPACE}}}identifier-prefixes"), el)
 
     def resolve_type(name: str) -> Tuple[str, ET.Element]:
-        assert (
-            name not in PRIMITIVE_GIR_TYPES
-        ), f"unexpectedly asked to resolve primitive type: {name}"
+        assert name not in PRIMITIVE_GIR_TYPES, f"unexpectedly asked to resolve primitive type: {name}"
 
         tokens = name.split(".", maxsplit=1)
         if len(tokens) == 2:
@@ -573,11 +549,7 @@ def parse_gir(
                 ns = namespace
             else:
                 ns = next(
-                    (
-                        dep.namespace
-                        for dep in dependencies
-                        if dep.namespace.name == ns_name
-                    ),
+                    (dep.namespace for dep in dependencies if dep.namespace.name == ns_name),
                     None,
                 )
                 if ns is None:
@@ -611,9 +583,7 @@ def parse_gir(
         methods = element.findall(".//method", GIR_NAMESPACES)
         properties = element.findall(".//property", GIR_NAMESPACES)
         signals = element.findall(".//glib:signal", GIR_NAMESPACES)
-        implements = [
-            e.get("name") for e in element.findall(".//implements", GIR_NAMESPACES)
-        ]
+        implements = [e.get("name") for e in element.findall(".//implements", GIR_NAMESPACES)]
 
         object_types[name] = factory.class_object_type(
             name=name,
@@ -673,9 +643,7 @@ def parse_gir(
         enum_c_type = element.get(f"{{{C_NAMESPACE}}}type")
         get_type = element.get(f"{{{GLIB_NAMESPACE}}}get-type")
         members = element.findall(".//member", GIR_NAMESPACES)
-        enumeration = factory.enumeration(
-            enum_name, enum_c_type, get_type, members, None
-        )
+        enumeration = factory.enumeration(enum_name, enum_c_type, get_type, members, None)
         if element.get(f"{{{GLIB_NAMESPACE}}}error-domain") is not None:
             error_domain = enumeration
             continue
@@ -715,15 +683,11 @@ def extract_callable_details(
     param_list = list(all_regular_parameters(full_param_list))
     has_closure_param = any((param.get("closure") == "1" for param in parameters))
 
-    is_async = any(
-        param.type.name == "Gio.AsyncReadyCallback" for param in full_param_list
-    )
+    is_async = any(param.type.name == "Gio.AsyncReadyCallback" for param in full_param_list)
     if not is_async:
         result_element = element
 
-    finish_c_identifier = (
-        result_element.get(f"{{{C_NAMESPACE}}}identifier") if is_async else None
-    )
+    finish_c_identifier = result_element.get(f"{{{C_NAMESPACE}}}identifier") if is_async else None
 
     throws = result_element.get("throws") == "1"
 
@@ -766,16 +730,10 @@ def extract_parameters(
             optional = False
 
         ownership_val = param.get("transfer-ownership")
-        transfer_ownership = (
-            TransferOwnership[ownership_val]
-            if ownership_val is not None
-            else TransferOwnership.none
-        )
+        transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
 
         raw_direction = param.get("direction")
-        direction = (
-            Direction(raw_direction) if raw_direction is not None else Direction.IN
-        )
+        direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
 
         param_list.append(
             factory.parameter(
@@ -804,9 +762,7 @@ def all_regular_parameters(parameters: List[Parameter]) -> Iterator[Parameter]:
         yield param
 
 
-def extract_type_from_entity(
-    parent_element: ET.Element, resolve_type: ResolveTypeCallback
-) -> Optional[Type]:
+def extract_type_from_entity(parent_element: ET.Element, resolve_type: ResolveTypeCallback) -> Optional[Type]:
     child = parent_element.find("type", GIR_NAMESPACES)
     if child is None:
         child = parent_element.find("array", GIR_NAMESPACES)
@@ -826,17 +782,13 @@ def extract_type_from_entity(
         elif element_type.name == "GObject.Value":
             return Type("Value[]", "valuearray", "GValue *", "NULL", "NULL", "NULL")
         else:
-            assert (
-                element_type.name == "guint8"
-            ), f"unsupported array type: {element_type.name}"
+            assert element_type.name == "guint8", f"unsupported array type: {element_type.name}"
             return Type("uint8[]", "bytearray", "guint8 *", "NULL", "NULL", "NULL")
 
     return parse_type(child, resolve_type)
 
 
-def parse_type(
-    element: ET.Element, resolve_type: ResolveTypeCallback
-) -> Optional[Type]:
+def parse_type(element: ET.Element, resolve_type: ResolveTypeCallback) -> Optional[Type]:
     name = element.get("name")
     assert name is not None
     if name == "none":
@@ -890,16 +842,12 @@ def parse_type(
     else:
         copy_func = type_element.get("copy-function")
         destroy_func = type_element.get("free-function")
-        assert (
-            destroy_func is not None
-        ), f"unable to resolve destroy function for {name}, core_tag={core_tag}"
+        assert destroy_func is not None, f"unable to resolve destroy function for {name}, core_tag={core_tag}"
 
     return Type(name, nick, c, default_value, copy_func, destroy_func)
 
 
-def type_nick_from_name(
-    name: str, element: ET.Element, resolve_type: ResolveTypeCallback
-) -> str:
+def type_nick_from_name(name: str, element: ET.Element, resolve_type: ResolveTypeCallback) -> str:
     if name == "GLib.PollFD":
         return "pollfd"
 

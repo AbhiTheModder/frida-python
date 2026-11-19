@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping
+from typing import Dict
 
 from .model import (
     ConstructorCustomizations,
@@ -32,7 +32,7 @@ LEGACY_PRIVATE_TYPES = (
 
 
 def load_customizations() -> Customizations:
-    type_customizations: Mapping[str, TypeCustomizations] = {
+    type_customizations: Dict[str, TypeCustomizations] = {
         "DeviceManager": ObjectTypeCustomizations(
             custom_code=CustomCode(
                 members=(

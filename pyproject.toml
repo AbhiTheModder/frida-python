@@ -13,11 +13,12 @@ extend_skip_glob = ["frida/frida_bindgen/assets/*"]
 known_first_party = ["frida", "frida_bindgen_core"]
 
 [tool.mypy]
-exclude = ["frida/frida_bindgen/assets/"]
+exclude = ["frida/frida_bindgen/assets/", "frida/frida_bindgen_core/"]
 
 [[tool.mypy.overrides]]
 module = "frida_bindgen_core.*"
 ignore_missing_imports = true
+follow_imports = "skip"
 
 [[tool.mypy.overrides]]
 module = ["_frida", "frida._frida", "frida.aio", "frida.core"]
